@@ -49,12 +49,35 @@
         >
           <i class="fa-solid fa-forward"></i>
         </button>
-        <button
-          id="speed"
-          class="media-buttons btn btn-outline-light d-flex justify-content-center col-xs-3"
-        >
-          <i class="fa-solid fa-sliders"></i>
-        </button>
+        <div class="slidecontainer">
+          <input
+            type="range"
+            min="0.1"
+            max="3"
+            value="1"
+            class="slider"
+            id="range"
+            step="0.1"
+            onchange="document.getElementById('speedText').value = this.value"
+          />
+        </div>
+        <input
+          id="speedText"
+          type="number"
+          style="
+            width: 50px;
+            margin-left: 10px;
+            background: #212529;
+            background-color: #212529;
+            border: 0px;
+            color: white;
+          "
+          max="3"
+          min="0.1"
+          value="1"
+          step="0.1"
+          onchange="document.getElementById('range').value = this.value"
+        />
       </div>
     </div>
     <div class="containerPane">
@@ -113,11 +136,16 @@
           <label for="foreColor">Font Color</label>
         </div>
         <div class="input-wrapper">
-          <input type="color" value="#FFFFFF" id="HiliteColor" class="adv-option-button" />
+          <input
+            type="color"
+            value="#FFFFFF"
+            id="HiliteColor"
+            class="adv-option-button"
+          />
           <label for="backColor">Highlight Color</label>
         </div>
       </div>
-      <div id="text-input" contenteditable="true"></div>
+      <div id="text-input" contenteditable="true" onchange="currIndex=0"></div>
     </div>
     <script src="script.js"></script>
     <script
