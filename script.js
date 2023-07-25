@@ -118,13 +118,25 @@ const highlighterRemover = (className) => {
 };
 // text to speech
 let synth = speechSynthesis;
-
+// let isenxt =false;
 function textToSpeech(text, flag = false) {
+  if (!text) return;
+  console.log("play " + text);
   document.getElementById("pause").firstElementChild.className =
     "fa-solid fa-circle-pause";
   let utterance = new SpeechSynthesisUtterance(text);
+  // isenxt = false;
+  utterance.rate = document.getElementById("range").value;
   synth.speak(utterance);
+  // console.log("speak ends " + text);
   utterance.onend = function () {
+    currIndex++;
+    console.log("onend " + currIndex);
+    if (isSpeaking)
+      textToSpeech(sentences[currIndex], currIndex == sentences.length - 1);
+    if (typeof onEndCallback === "function") {
+      onEndCallback();
+    }
     if (flag == true) {
       document.getElementById("pause").firstElementChild.className =
         "fa-solid fa-circle-play";
@@ -138,29 +150,81 @@ let sentences = [],
 function pauseVoice() {
   document.getElementById("pause").firstElementChild.className =
     "fa-solid fa-circle-play";
-  synth.pause();
+  // synth.pause();
+  synth.cancel();
   isSpeaking = false;
 }
 function back() {
+  pauseVoice();
   currIndex--;
+  if (currIndex <= 0) currIndex = 0;
+  isSpeaking = true;
+
+  if (isSpeaking) {
+    synth.cancel();
+    // console.log("back" + currIndex + " " + isSpeaking);
+    textToSpeech(sentences[currIndex], currIndex == sentences.length - 1);
+  }
 }
 function forward() {
+  pauseVoice();
   currIndex++;
+  if (currIndex >= sentences.length) {
+    synth.cancel();
+    return;
+  }
+  isSpeaking = true;
+
+  if (isSpeaking) {
+    synth.cancel();
+    // console.log("forward" + currIndex + " " + isSpeaking);
+    textToSpeech(sentences[currIndex], currIndex == sentences.length - 1);
+  }
 }
+
+function spliter(originalList, delimiter) {
+  if (typeof originalList == "string")
+    return originalList.split(delimiter).filter((el) => el.length > 0);
+  let resultList = [];
+
+  originalList.forEach((string) => {
+    let splitStrings = string.split(delimiter);
+    resultList.push(...splitStrings);
+  });
+  return resultList.filter((el) => el.length > 0);
+}
+
 function playVoice() {
   // document.getElementById("pause").firstElementChild.className =
   //   "fa-solid fa-circle-pause";
+  let x = document.getElementById("text-input");
+  if (x.innerText == "") return;
+  // console.log(x.innerText);
+
   synth.cancel();
   isSpeaking = true;
-  let x = document.getElementById("text-input");
-  sentences = x.innerText.split("\n").filter((el) => el.length > 0); // splitting and removing empty sentences
-  currIndex = Math.max(currIndex, sentences.length);
-  currIndex %= sentences.length;
-  for (; currIndex < sentences.length; currIndex++) {
-    if (isSpeaking) {
-      textToSpeech(sentences[currIndex], currIndex == sentences.length - 1);
-    }
+
+  // sentences = x.value.split().filter((el) => el.length > 0);
+
+  let newSentences = spliter(spliter(x.innerText, "."), "\n"); // splitting and removing empty sentences
+  if (newSentences != sentences) {
+    currIndex = 0;
+    sentences = newSentences;
   }
+  currIndex = Math.min(currIndex, sentences.length);
+  currIndex %= sentences.length;
+
+  if (isSpeaking)
+    textToSpeech(sentences[currIndex], currIndex == sentences.length - 1);
+
+  // for (; currIndex < sentences.length;) {
+  //   if (isSpeaking) {
+
+  //     console.log(currIndex)
+  //     textToSpeech(sentences[currIndex], currIndex == sentences.length - 1);
+  //     // if(isenxt) currIndex++;
+  //   }
+  // }
 }
 
 window.onload = initializer();
